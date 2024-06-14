@@ -12,15 +12,15 @@ type CommitmentType string
 
 const (
 	OptimismCommitmentMode CommitmentType = "optimism"
-	DefaultCommitmentMode  CommitmentType = "default"
+	SimpleCommitmentMode   CommitmentType = "simple"
 )
 
 func StringToCommitmentMode(s string) (CommitmentType, error) {
 	switch s {
 	case string(OptimismCommitmentMode):
 		return OptimismCommitmentMode, nil
-	case string(DefaultCommitmentMode):
-		return DefaultCommitmentMode, nil
+	case string(SimpleCommitmentMode):
+		return SimpleCommitmentMode, nil
 	default:
 		return "", fmt.Errorf("unknown commitment mode: %s", s)
 	}
@@ -59,7 +59,7 @@ func StringToCommitment(key string, c CommitmentType) ([]byte, error) {
 			return nil, fmt.Errorf("commitment is not a supported EigenDA cert encoding")
 		}
 		return eigendaComm.MustCertV0Value(), nil
-	case DefaultCommitmentMode:
+	case SimpleCommitmentMode:
 		var eigendaComm commitments.EigenDACommitment
 		err = eigendaComm.Unmarshal(b)
 		if err != nil {
@@ -79,7 +79,7 @@ func EncodeCommitment(s []byte, c CommitmentType) ([]byte, error) {
 	case OptimismCommitmentMode:
 		comm := commitments.OptimismEigenDACommitment(commitments.EigenDACertV0(s))
 		return comm.Marshal()
-	case DefaultCommitmentMode:
+	case SimpleCommitmentMode:
 		comm := commitments.EigenDACertV0(s)
 		return comm.Marshal()
 	default:

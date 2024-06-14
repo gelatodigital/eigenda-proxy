@@ -87,17 +87,17 @@ func TestProxyClient(t *testing.T) {
 	var testPreimage = []byte("inter-subjective and not objective!")
 
 	t.Log("Setting input data on proxy server...")
-	blobInfo, err := daClient.SetData(ts.Ctx, testPreimage, server.DefaultCommitmentMode)
+	blobInfo, err := daClient.SetData(ts.Ctx, testPreimage, server.SimpleCommitmentMode)
 	require.NoError(t, err)
 
 	// 2 - fetch data from EigenDA for generated commitment key
 	t.Log("Getting input data from proxy server...")
-	preimage, err := daClient.GetData(ts.Ctx, blobInfo, server.BinaryDomain, server.DefaultCommitmentMode)
+	preimage, err := daClient.GetData(ts.Ctx, blobInfo, server.BinaryDomain, server.SimpleCommitmentMode)
 	require.NoError(t, err)
 	require.Equal(t, testPreimage, preimage)
 
 	// 3 - fetch iFFT representation of preimage
-	iFFTPreimage, err := daClient.GetData(ts.Ctx, blobInfo, server.PolyDomain, server.DefaultCommitmentMode)
+	iFFTPreimage, err := daClient.GetData(ts.Ctx, blobInfo, server.PolyDomain, server.SimpleCommitmentMode)
 	require.NoError(t, err)
 	require.NotEqual(t, preimage, iFFTPreimage)
 
