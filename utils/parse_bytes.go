@@ -1,68 +1,10 @@
-package common
+package utils
 
 import (
 	"fmt"
 	"strconv"
 	"strings"
-
-	"github.com/Layr-Labs/eigenda/api/grpc/disperser"
 )
-
-var (
-	ErrInvalidDomainType = fmt.Errorf("invalid domain type")
-)
-
-type Certificate = disperser.BlobInfo
-
-// DomainType is a enumeration type for the different data domains for which a
-// blob can exist between
-type DomainType uint8
-
-const (
-	BinaryDomain DomainType = iota
-	PolyDomain
-	UnknownDomain
-)
-
-func (dt DomainType) String() string {
-	switch dt {
-	case BinaryDomain:
-		return "binary"
-
-	case PolyDomain:
-		return "polynomial"
-
-	default:
-		return "unknown"
-	}
-}
-
-func StrToDomainType(s string) DomainType {
-	switch s {
-	case "binary":
-		return BinaryDomain
-	case "polynomial":
-		return PolyDomain
-	default:
-		return UnknownDomain
-	}
-}
-
-// Helper utility functions //
-
-func EqualSlices[P comparable](s1, s2 []P) bool {
-	if len(s1) != len(s2) {
-		return false
-	}
-
-	for i := 0; i < len(s1); i++ {
-		if s1[i] != s2[i] {
-			return false
-		}
-	}
-
-	return true
-}
 
 func ParseBytesAmount(s string) (uint64, error) {
 	s = strings.TrimSpace(s)
@@ -109,9 +51,4 @@ func ParseBytesAmount(s string) (uint64, error) {
 	default:
 		return 0, fmt.Errorf("unsupported unit: %s", unit)
 	}
-}
-
-type Stats struct {
-	Entries int
-	Reads   int
 }

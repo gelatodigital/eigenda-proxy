@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/Layr-Labs/eigenda-proxy/client"
+	"github.com/Layr-Labs/eigenda-proxy/server"
 
-	"github.com/Layr-Labs/eigenda-proxy/common"
 	"github.com/Layr-Labs/eigenda-proxy/e2e"
 	"github.com/Layr-Labs/eigenda/api/clients/codecs"
 	"github.com/ethereum-optimism/optimism/op-e2e/e2eutils/wait"
@@ -87,17 +87,17 @@ func TestProxyClient(t *testing.T) {
 	var testPreimage = []byte("inter-subjective and not objective!")
 
 	t.Log("Setting input data on proxy server...")
-	blobInfo, err := daClient.SetData(ts.Ctx, testPreimage)
+	blobInfo, err := daClient.SetData(ts.Ctx, testPreimage, server.DefaultCommitmentMode)
 	require.NoError(t, err)
 
 	// 2 - fetch data from EigenDA for generated commitment key
 	t.Log("Getting input data from proxy server...")
-	preimage, err := daClient.GetData(ts.Ctx, blobInfo, common.BinaryDomain)
+	preimage, err := daClient.GetData(ts.Ctx, blobInfo, server.BinaryDomain, server.DefaultCommitmentMode)
 	require.NoError(t, err)
 	require.Equal(t, testPreimage, preimage)
 
 	// 3 - fetch iFFT representation of preimage
-	iFFTPreimage, err := daClient.GetData(ts.Ctx, blobInfo, common.PolyDomain)
+	iFFTPreimage, err := daClient.GetData(ts.Ctx, blobInfo, server.PolyDomain, server.DefaultCommitmentMode)
 	require.NoError(t, err)
 	require.NotEqual(t, preimage, iFFTPreimage)
 

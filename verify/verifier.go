@@ -3,11 +3,11 @@ package verify
 import (
 	"fmt"
 
-	"github.com/Layr-Labs/eigenda/api/grpc/common"
 	"github.com/Layr-Labs/eigenda/encoding"
 	"github.com/consensys/gnark-crypto/ecc/bn254"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fp"
 
+	"github.com/Layr-Labs/eigenda/api/grpc/common"
 	"github.com/Layr-Labs/eigenda/encoding/kzg"
 	"github.com/Layr-Labs/eigenda/encoding/kzg/prover"
 	"github.com/Layr-Labs/eigenda/encoding/rs"
@@ -60,7 +60,6 @@ func (v *Verifier) Verify(expectedCommit *common.G1Commitment, blob []byte) erro
 		return err
 	}
 
-	// convert to field elements
 	expectedX := &fp.Element{}
 	expectedX.Unmarshal(expectedCommit.X)
 	expectedY := &fp.Element{}

@@ -1,4 +1,4 @@
-package eigenda
+package server
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/Layr-Labs/eigenda-proxy/common"
+	"github.com/Layr-Labs/eigenda-proxy/utils"
 	"github.com/Layr-Labs/eigenda/api/clients"
 	"github.com/Layr-Labs/eigenda/api/clients/codecs"
 	"github.com/Layr-Labs/eigenda/encoding/kzg"
@@ -25,10 +25,12 @@ const (
 	PutBlobEncodingVersionFlagName       = "eigenda-put-blob-encoding-version"
 	DisablePointVerificationModeFlagName = "eigenda-disable-point-verification-mode"
 	// Kzg flags
-	G1PathFlagName        = "eigenda-g1-path"
-	G2TauFlagName         = "eigenda-g2-tau-path"
-	CachePathFlagName     = "eigenda-cache-path"
-	MaxBlobLengthFlagName = "eigenda-max-blob-length"
+	G1PathFlagName             = "eigenda-g1-path"
+	G2TauFlagName              = "eigenda-g2-tau-path"
+	CachePathFlagName          = "eigenda-cache-path"
+	MaxBlobLengthFlagName      = "eigenda-max-blob-length"
+	MemstoreFlagName           = "memstore.enabled"
+	MemstoreExpirationFlagName = "memstore.expiration"
 )
 
 const BytesPerSymbol = 31
@@ -54,11 +56,15 @@ type Config struct {
 	maxBlobLengthBytes uint64
 
 	G2PowerOfTauPath string
+
+	// Memstore Config params
+	MemstoreEnabled        bool
+	MemstoreBlobExpiration time.Duration
 }
 
 func (c *Config) GetMaxBlobLength() (uint64, error) {
 	if c.maxBlobLengthBytes == 0 {
-		numBytes, err := common.ParseBytesAmount(c.MaxBlobLength)
+		numBytes, err := utils.ParseBytesAmount(c.MaxBlobLength)
 		if err != nil {
 			return 0, err
 		}
@@ -105,10 +111,12 @@ func ReadConfig(ctx *cli.Context) Config {
 			PutBlobEncodingVersion:       codecs.BlobEncodingVersion(ctx.Uint(PutBlobEncodingVersionFlagName)),
 			DisablePointVerificationMode: ctx.Bool(DisablePointVerificationModeFlagName),
 		},
-		G1Path:           ctx.String(G1PathFlagName),
-		G2PowerOfTauPath: ctx.String(G2TauFlagName),
-		CacheDir:         ctx.String(CachePathFlagName),
-		MaxBlobLength:    ctx.String(MaxBlobLengthFlagName),
+		G1Path:                 ctx.String(G1PathFlagName),
+		G2PowerOfTauPath:       ctx.String(G2TauFlagName),
+		CacheDir:               ctx.String(CachePathFlagName),
+		MaxBlobLength:          ctx.String(MaxBlobLengthFlagName),
+		MemstoreEnabled:        ctx.Bool(MemstoreFlagName),
+		MemstoreBlobExpiration: ctx.Duration(MemstoreExpirationFlagName),
 	}
 	return cfg
 }
@@ -198,6 +206,17 @@ func CLIFlags(envPrefix string) []cli.Flag {
 			Name:    CachePathFlagName,
 			Usage:   "Directory path to SRS tables",
 			EnvVars: prefixEnvVars("TARGET_CACHE_PATH"),
+		},
+		&cli.BoolFlag{
+			Name:    MemstoreFlagName,
+			Usage:   "Whether to use mem-store for DA logic.",
+			EnvVars: []string{"MEMSTORE_ENABLED"},
+		},
+		&cli.DurationFlag{
+			Name:    MemstoreExpirationFlagName,
+			Usage:   "Duration that a mem-store blob/commitment pair are allowed to live.",
+			Value:   25 * time.Minute,
+			EnvVars: []string{"MEMSTORE_EXPIRATION"},
 		},
 	}
 }

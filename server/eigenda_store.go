@@ -1,14 +1,16 @@
-package store
+package server
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/Layr-Labs/eigenda-proxy/common"
 	"github.com/Layr-Labs/eigenda-proxy/verify"
 	"github.com/Layr-Labs/eigenda/api/clients"
+	"github.com/Layr-Labs/eigenda/api/grpc/disperser"
 	"github.com/ethereum/go-ethereum/rlp"
 )
+
+type Certificate = disperser.BlobInfo
 
 // EigenDAStore does storage interactions and verifications for blobs with DA.
 type EigenDAStore struct {
@@ -29,8 +31,8 @@ func NewEigenDAStore(ctx context.Context, client *clients.EigenDAClient, v *veri
 
 // Get fetches a blob from DA using certificate fields and verifies blob
 // against commitment to ensure data is valid and non-tampered.
-func (e EigenDAStore) Get(ctx context.Context, key []byte, domain common.DomainType) ([]byte, error) {
-	var cert common.Certificate
+func (e EigenDAStore) Get(ctx context.Context, key []byte, domain DomainType) ([]byte, error) {
+	var cert Certificate
 	err := rlp.DecodeBytes(key, &cert)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode DA cert to RLP format: %w", err)
@@ -52,9 +54,9 @@ func (e EigenDAStore) Get(ctx context.Context, key []byte, domain common.DomainT
 	}
 
 	switch domain {
-	case common.BinaryDomain:
+	case BinaryDomain:
 		return decodedBlob, nil
-	case common.PolyDomain:
+	case PolyDomain:
 		return encodedBlob, nil
 	default:
 		return nil, fmt.Errorf("unexpected domain type: %d", domain)
@@ -89,6 +91,6 @@ func (e EigenDAStore) Put(ctx context.Context, value []byte) (comm []byte, err e
 }
 
 // Entries is a no-op for EigenDA Store
-func (e EigenDAStore) Stats() *common.Stats {
+func (e EigenDAStore) Stats() *Stats {
 	return nil
 }
